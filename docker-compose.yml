@@ -1,0 +1,29 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: txtai-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-5000}
+      FLASK_DEBUG: "false"
+    ports:
+      - "5000:5000"
+
+  ngrok:
+    image: ngrok/ngrok:3
+    container_name: txtai-ngrok
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?NGROK_AUTHTOKEN is required}
+    command:
+      - "http"
+      - "app:5000"
+      - "--log=stdout"
+    ports:
+      - "4040:4040"
